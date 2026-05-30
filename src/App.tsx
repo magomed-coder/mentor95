@@ -13,6 +13,8 @@ import {
   FaHandshake,
 } from "react-icons/fa";
 
+import { IcosahedronGeometry, MeshBasicMaterial } from "three";
+
 // ---- Типы ----
 type FAQItem = {
   question: string;
@@ -165,6 +167,35 @@ function generateCloudPositions(count: number) {
   return positions;
 }
 
+extend({ IcosahedronGeometry, MeshBasicMaterial });
+
+const WireframeIcosahedron: React.FC = () => {
+  const group = useRef<THREE.Group>(null);
+  useFrame(({ clock }) => {
+    if (group.current) {
+      // Вращение
+      group.current.rotation.y += 0.005;
+      group.current.rotation.x = Math.sin(clock.getElapsedTime() * 0.5) * 0.15;
+      // Плавание вверх-вниз
+      group.current.position.y = Math.sin(clock.getElapsedTime() * 0.7) * 0.25;
+    }
+  });
+  return (
+    <group ref={group} position={[0, 0, 0]}>
+      <mesh>
+        <icosahedronGeometry args={[1.5, 0]} attach="geometry" />
+        <meshBasicMaterial
+          wireframe
+          opacity={0.15}
+          transparent
+          color="#111"
+          attach="material"
+        />
+      </mesh>
+    </group>
+  );
+};
+
 const ParticleCloud: React.FC = () => {
   const pointsRef = useRef<THREE.Points>(null);
   const mouse = useRef({ x: 0, y: 0 });
@@ -229,6 +260,7 @@ const ParticleCloudScene: React.FC = () => (
     <group position={[-1, 1, 0]}>
       <ParticleCloud />
     </group>
+    <WireframeIcosahedron />
   </Canvas>
 );
 

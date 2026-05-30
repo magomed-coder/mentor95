@@ -104,7 +104,23 @@ const faqs: FAQItem[] = [
   },
 ];
 
-// ---- Компонент аккордеона ----
+// Партнёры (React Icons вместо картинок)
+const partners = [
+  { name: "TechCorp", logo: "https://placehold.co/160x80?text=TechCorp" },
+  { name: "FinLeaders", logo: "https://placehold.co/160x80?text=FinLeaders" },
+  { name: "ScaleUp", logo: "https://placehold.co/160x80?text=ScaleUp" },
+  {
+    name: "GlobalVentures",
+    logo: "https://placehold.co/160x80?text=GlobalVentures",
+  },
+  { name: "InnovateX", logo: "https://placehold.co/160x80?text=InnovateX" },
+  {
+    name: "CapitalGroup",
+    logo: "https://placehold.co/160x80?text=CapitalGroup",
+  },
+];
+
+// ---- Аккордеон ----
 const AccordionItem: React.FC<{ item: FAQItem; index: number }> = ({
   item,
   index,
@@ -148,19 +164,17 @@ const AccordionItem: React.FC<{ item: FAQItem; index: number }> = ({
 const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // Блокировка скролла при открытом меню
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
     }
     return () => {
-      document.body.style.overflow = "auto";
+      document.body.style.overflow = "";
     };
   }, [isMenuOpen]);
 
-  // Плавная прокрутка к секции с учётом высоты навигации
   const scrollToSection = (sectionId: string) => {
     setIsMenuOpen(false);
     const element = document.getElementById(sectionId);
@@ -168,20 +182,17 @@ const App: React.FC = () => {
       const navHeight = 80;
       const elementPosition =
         element.getBoundingClientRect().top + window.scrollY;
-      window.scrollTo({
-        top: elementPosition - navHeight,
-        behavior: "smooth",
-      });
+      window.scrollTo({ top: elementPosition - navHeight, behavior: "smooth" });
     }
   };
 
-  // Пункты меню (якоря)
   const menuItems = [
     { label: "Главная", id: "home" },
     { label: "Обо мне", id: "about" },
     { label: "Экспертиза", id: "expertise" },
     { label: "Истории успеха", id: "success" },
     { label: "Услуги", id: "services" },
+    { label: "Партнеры", id: "partners" },
     { label: "Отзывы", id: "testimonials" },
     { label: "FAQ", id: "faq" },
     { label: "Контакты", id: "contact" },
@@ -189,42 +200,33 @@ const App: React.FC = () => {
 
   return (
     <div className="bg-[#F5F5F3] text-[#111111] font-sans antialiased selection:bg-[#FF8C42]/20 overflow-x-hidden">
-      {/* ---- Навигация + бургер-меню ---- */}
+      {/* Навигация */}
       <nav className="fixed top-0 left-0 w-full z-50 py-6 px-6 md:px-12 mix-blend-difference">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="text-white text-xl tracking-tighter font-semibold">
             АД
           </div>
-          <div className="flex items-center gap-8">
-            {/* Бургер-иконка с анимацией */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="relative z-50 text-white focus:outline-none"
-              aria-label="Меню"
-            >
-              <div className="w-6 h-5 flex flex-col justify-between">
-                <span
-                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${
-                    isMenuOpen ? "rotate-45 translate-y-2" : ""
-                  }`}
-                />
-                <span
-                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${
-                    isMenuOpen ? "opacity-0" : ""
-                  }`}
-                />
-                <span
-                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${
-                    isMenuOpen ? "-rotate-45 -translate-y-2" : ""
-                  }`}
-                />
-              </div>
-            </button>
-          </div>
+          <button
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="relative z-50 text-white focus:outline-none"
+            aria-label="Меню"
+          >
+            <div className="w-6 h-5 flex flex-col justify-between">
+              <span
+                className={`block h-0.5 w-full bg-white transition-all duration-300 ${isMenuOpen ? "rotate-45 translate-y-2" : ""}`}
+              />
+              <span
+                className={`block h-0.5 w-full bg-white transition-all duration-300 ${isMenuOpen ? "opacity-0" : ""}`}
+              />
+              <span
+                className={`block h-0.5 w-full bg-white transition-all duration-300 ${isMenuOpen ? "-rotate-45 -translate-y-2" : ""}`}
+              />
+            </div>
+          </button>
         </div>
       </nav>
 
-      {/* Оверлей меню */}
+      {/* Меню-оверлей */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -270,15 +272,12 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ---- Hero секция с id="home" ---- */}
+      {/* Hero (home) */}
       <section id="home" className="relative h-screen w-full overflow-hidden">
-        {/* Фоновые градиентные блики */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-[40rem] h-[40rem] bg-[#FF8C42] rounded-full blur-[120px] opacity-20 animate-pulse" />
           <div className="absolute bottom-1/3 right-1/4 w-[35rem] h-[35rem] bg-[#FF6B8A] rounded-full blur-[140px] opacity-20 animate-pulse" />
         </div>
-
-        {/* Массивная фоновая типографика */}
         <div className="absolute inset-0 z-0 flex flex-col justify-center items-center pointer-events-none select-none">
           <span className="text-[18vw] md:text-[15vw] font-black uppercase tracking-tighter text-[#111111] opacity-[0.08] whitespace-nowrap leading-none">
             БИЗНЕС
@@ -287,10 +286,7 @@ const App: React.FC = () => {
             НАСТАВНИК
           </span>
         </div>
-
-        {/* Контент Hero */}
         <div className="relative z-10 h-full w-full flex items-center justify-center">
-          {/* Центральный круглый портрет */}
           <motion.div
             initial={{ scale: 1.08, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -300,14 +296,12 @@ const App: React.FC = () => {
             <div className="w-full max-w-md aspect-square overflow-hidden rounded-full bg-gray-200 mx-auto">
               <img
                 src={imgUrl}
-                alt="Алекс Джонсон, бизнес-наставник, чёрно-белый портрет"
+                alt="Алекс Джонсон"
                 className="w-full h-full object-cover grayscale contrast-125"
                 style={{ filter: "grayscale(100%) contrast(110%)" }}
               />
             </div>
           </motion.div>
-
-          {/* Правый блок с представлением */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -322,8 +316,6 @@ const App: React.FC = () => {
               увеличивать прибыль и строить сильные команды.
             </p>
           </motion.div>
-
-          {/* Три экспертных блока внизу слева */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -342,7 +334,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Обо мне (id="about") ---- */}
+      {/* Обо мне (прямоугольный портрет, как было) */}
       <section id="about" className="py-40 md:py-56 px-6 max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div
@@ -352,14 +344,13 @@ const App: React.FC = () => {
             transition={{ duration: 0.7 }}
             className="relative flex justify-center"
           >
-            {/* <div className="w-full max-w-sm aspect-square overflow-hidden rounded-full bg-gray-200"> */}
+            {/* Прямое изображение без круглой обёртки */}
             <img
               src={imgUrl}
               alt="Алекс Джонсон"
-              className="w-full h-full object-cover grayscale contrast-125"
+              className="w-full h-auto object-cover grayscale contrast-125"
               style={{ filter: "grayscale(100%) contrast(110%)" }}
             />
-            {/* </div> */}
             <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#FF8C42] rounded-full blur-3xl opacity-30 -z-10" />
           </motion.div>
           <motion.div
@@ -388,7 +379,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Экспертиза (id="expertise") ---- */}
+      {/* Экспертиза */}
       <section
         id="expertise"
         className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
@@ -432,7 +423,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Истории успеха (id="success") ---- */}
+      {/* Истории успеха */}
       <section
         id="success"
         className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
@@ -492,7 +483,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Услуги (id="services") ---- */}
+      {/* Услуги */}
       <section
         id="services"
         className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
@@ -534,7 +525,49 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Отзывы (id="testimonials") ---- */}
+      {/* Новая секция: Клиенты и партнеры */}
+      <section
+        id="partners"
+        className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
+      >
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mb-20 text-center"
+        >
+          <span className="text-sm uppercase tracking-wider text-[#FF8C42] font-semibold">
+            Нам доверяют
+          </span>
+          <h2 className="text-5xl md:text-7xl font-black tracking-tighter mt-4">
+            Партнеры и клиенты
+          </h2>
+          <p className="text-[#666666] max-w-2xl mx-auto mt-6">
+            Ведущие компании, которые выбрали стратегическое наставничество
+          </p>
+        </motion.div>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 items-center">
+          {partners.map((partner, idx) => (
+            <motion.div
+              key={partner.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: idx * 0.05 }}
+              className="flex flex-col items-center justify-center grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
+            >
+              <span className="mb-2 text-5xl text-[#FF8C42]">
+                {partner.icon}
+              </span>
+              <span className="text-xs mt-1 text-[#111111]/60 font-semibold uppercase tracking-wide">
+                {partner.name}
+              </span>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Отзывы */}
       <section
         id="testimonials"
         className="py-40 md:py-56 border-t border-black/5 overflow-hidden"
@@ -553,7 +586,11 @@ const App: React.FC = () => {
             </h2>
           </motion.div>
         </div>
-        <div className="overflow-x-auto scrollbar-hide pb-8 cursor-grab">
+        <div
+          className="overflow-x-auto pb-8 cursor-grab"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          <style>{`.overflow-x-auto::-webkit-scrollbar { display: none; }`}</style>
           <div className="flex gap-8 px-6 w-max">
             {testimonials.map((t, idx) => (
               <motion.div
@@ -578,7 +615,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- FAQ (id="faq") ---- */}
+      {/* FAQ */}
       <section
         id="faq"
         className="py-40 md:py-56 px-6 max-w-4xl mx-auto border-t border-black/5"
@@ -603,7 +640,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Контакт (id="contact") ---- */}
+      {/* Контакт */}
       <section
         id="contact"
         className="py-40 md:py-56 px-6 border-t border-black/5"
@@ -633,7 +670,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Подвал ---- */}
+      {/* Подвал */}
       <footer className="py-12 border-t border-black/5 text-center text-sm text-[#666666]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <span>© 2025 Алекс Джонсон — Стратегическое наставничество</span>

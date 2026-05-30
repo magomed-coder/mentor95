@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { OrbitControls, Torus, Environment } from "@react-three/drei";
+import { Canvas, useFrame, extend, useThree } from "@react-three/fiber";
+import { Points, PointMaterial } from "@react-three/drei";
 import * as THREE from "three";
 import imgUrl from "./assets/photo.avif";
 import {
@@ -19,7 +19,7 @@ type FAQItem = {
   answer: string;
 };
 
-// ---- Данные (без изменений) ----
+// ---- Данные ----
 const expertiseList = [
   {
     id: "01",
@@ -148,192 +148,86 @@ const partners = [
   },
 ];
 
-// ---- 3D-компонент: абстрактные сферы (luxury) ----
-const FloatingSpheres: React.FC = () => {
-  const groupRef = useRef<THREE.Group>(null);
+// ---- Particle Cloud (облако точек, премиум-стиль) ----
+const PARTICLE_COUNT = 4000;
+function generateCloudPositions(count: number) {
+  // равномерно по сфере, но с небольшим "облаком" шумом
+  const positions = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    // Сферические координаты
+    const phi = Math.acos(2 * Math.random() - 1);
+    const theta = 2 * Math.PI * Math.random();
+    const r = 1.2 + Math.random() * 0.5; // радиус облака
+    positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+    positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+    positions[i * 3 + 2] = r * Math.cos(phi);
+  }
+  return positions;
+}
+
+const ParticleCloud: React.FC = () => {
+  const pointsRef = useRef<THREE.Points>(null);
+  const mouse = useRef({ x: 0, y: 0 });
+  const targetRot = useRef({ x: 0, y: 0 });
+  const positions = useRef(generateCloudPositions(PARTICLE_COUNT));
+
+  // Mouse interaction: плавное вращение
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const x = (e.clientX / window.innerWidth) * 2 - 1;
+      const y = (e.clientY / window.innerHeight) * 2 - 1;
+      targetRot.current.x = y * 0.25;
+      targetRot.current.y = x * 0.4;
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.05;
-      groupRef.current.rotation.x =
-        Math.sin(state.clock.elapsedTime * 0.1) * 0.1;
+    if (pointsRef.current) {
+      // Медленное "течение" облака
+      pointsRef.current.rotation.y +=
+        (targetRot.current.y - pointsRef.current.rotation.y) * 0.04 + 0.008;
+      pointsRef.current.rotation.x +=
+        (targetRot.current.x - pointsRef.current.rotation.x) * 0.04 + 0.003;
     }
   });
+
   return (
-    <group ref={groupRef}>
-      {/* Центральная большая сфера с металлическим блеском */}
-      <mesh position={[0, 0, 0]}>
-        <sphereGeometry args={[1.2, 64, 64]} />
-        <meshStandardMaterial
-          color="#FF8C42"
-          emissive="#FF6B8A"
-          emissiveIntensity={0.3}
-          roughness={0.2}
-          metalness={0.8}
-        />
-      </mesh>
-      {/* Оранжевая сфера поменьше, смещённая */}
-      <mesh position={[2, 1.5, -1]}>
-        <sphereGeometry args={[0.6, 64, 64]} />
-        <meshStandardMaterial
-          color="#FF8C42"
-          emissive="#FF8C42"
-          emissiveIntensity={0.2}
-          roughness={0.3}
-          metalness={0.6}
-        />
-      </mesh>
-      {/* Розовая сфера */}
-      <mesh position={[-1.8, -1.2, 1.5]}>
-        <sphereGeometry args={[0.7, 64, 64]} />
-        <meshStandardMaterial
-          color="#FF6B8A"
-          emissive="#FF6B8A"
-          emissiveIntensity={0.2}
-          roughness={0.4}
-          metalness={0.7}
-        />
-      </mesh>
-      {/* Маленькая сфера сверху */}
-      <mesh position={[0.5, 2.2, 0.8]}>
-        <sphereGeometry args={[0.4, 48, 48]} />
-        <meshStandardMaterial
-          color="#FF8C42"
-          emissiveIntensity={0.15}
-          metalness={0.5}
-          roughness={0.5}
-        />
-      </mesh>
-      {/* Полупрозрачный контур (дополнительный объём) */}
-      <mesh position={[0, 0, 0]} scale={1.5}>
-        <sphereGeometry args={[1.2, 32, 32]} />
-        <meshStandardMaterial
-          color="#FFFFFF"
-          emissive="#FF8C42"
-          emissiveIntensity={0.1}
-          transparent
-          opacity={0.15}
-          side={THREE.BackSide}
-        />
-      </mesh>
-    </group>
-  );
-};
-
-// ---- 3D-сцена с улучшенным освещением ----
-
-// ---- Wireframe 3D Scene ----
-const wireframeLabels = [
-  { label: "Архитектура", pos: [0, 1.7, 0], color: "#FF8C42" },
-  { label: "Стратегия", pos: [-2.2, -1.2, 0], color: "#FF6B8A" },
-  { label: "Структура", pos: [2.2, -1.2, 0], color: "#111111" },
-  { label: "Система", pos: [0, 0, 0], color: "#FF8C42" },
-];
-
-const FloatingWireframe: React.FC = () => {
-  const groupRef = useRef<THREE.Group>(null);
-  useFrame((state) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y = state.clock.elapsedTime * 0.12;
-      groupRef.current.rotation.x =
-        Math.sin(state.clock.elapsedTime * 0.18) * 0.12;
-    }
-  });
-  return (
-    <group ref={groupRef}>
-      {/* Main Icosahedron */}
-      <mesh position={[0, 0, 0]}>
-        <icosahedronGeometry args={[1.2, 0]} />
-        <meshBasicMaterial
-          wireframe
-          opacity={0.18}
-          transparent
-          color="#FF8C42"
-        />
-      </mesh>
-      {/* Left (strategy) */}
-      <mesh position={[-2.2, -1.2, 0]} scale={0.7}>
-        <icosahedronGeometry args={[1, 0]} />
-        <meshBasicMaterial
-          wireframe
-          opacity={0.15}
-          transparent
-          color="#FF6B8A"
-        />
-      </mesh>
-      {/* Right (structure) */}
-      <mesh position={[2.2, -1.2, 0]} scale={0.7}>
-        <icosahedronGeometry args={[1, 0]} />
-        <meshBasicMaterial
-          wireframe
-          opacity={0.15}
-          transparent
-          color="#111111"
-        />
-      </mesh>
-      {/* Top (architecture) */}
-      <mesh position={[0, 1.7, 0]} scale={0.5}>
-        <icosahedronGeometry args={[1, 0]} />
-        <meshBasicMaterial
-          wireframe
-          opacity={0.13}
-          transparent
-          color="#FF8C42"
-        />
-      </mesh>
-    </group>
-  );
-};
-
-const FloatingWireframeLabels: React.FC = () => {
-  // Labels are rendered as HTML overlays
-  return (
-    <>
-      {wireframeLabels.map((item, idx) => (
-        <div
-          key={item.label}
-          style={{
-            position: "absolute",
-            color: item.color,
-            fontWeight: 700,
-            fontSize: "1.1rem",
-            letterSpacing: "0.04em",
-            left: `calc(50% + ${item.pos[0] * 10}vw)`,
-            top: `calc(50% + ${-item.pos[1] * 10}vw)`,
-            pointerEvents: "none",
-            textShadow: "0 2px 12px #fff, 0 1px 0 #fff",
-            zIndex: 2,
-            userSelect: "none",
-            transition: "opacity 0.7s",
-            opacity: 0.7,
-          }}
-        >
-          {item.label}
-        </div>
-      ))}
-    </>
-  );
-};
-
-const WireframeScene: React.FC = () => (
-  <>
-    <Canvas
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        zIndex: 0,
-      }}
-      camera={{ position: [0, 0, 6], fov: 45 }}
+    <Points
+      ref={pointsRef}
+      positions={positions.current}
+      stride={3}
+      frustumCulled
     >
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[0, 5, 5]} intensity={0.3} />
-      <FloatingWireframe />
-    </Canvas>
-    <FloatingWireframeLabels />
-  </>
+      <PointMaterial
+        transparent
+        color="#111111"
+        size={0.055}
+        sizeAttenuation
+        depthWrite={false}
+        opacity={0.18}
+      />
+    </Points>
+  );
+};
+
+const ParticleCloudScene: React.FC = () => (
+  <Canvas
+    style={{
+      position: "absolute",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      pointerEvents: "none",
+      zIndex: 0,
+    }}
+    camera={{ position: [0, 0, 4.5], fov: 45 }}
+  >
+    <ambientLight intensity={0.5} />
+    <ParticleCloud />
+  </Canvas>
 );
 
 // ---- Аккордеон (без изменений) ----
@@ -546,16 +440,16 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Hero (home) с 3D-сценой */}
+      {/* Hero (home) с 3D-сценой wireframe */}
       <section id="home" className="relative h-screen w-full overflow-hidden">
-        {/* Градиентные блики (оставляем) */}
+        {/* Градиентные блики */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-[#FF8C42] rounded-full blur-[120px] opacity-20" />
           <div className="absolute bottom-1/3 right-1/4 w-[35vw] h-[35vw] bg-[#FF6B8A] rounded-full blur-[140px] opacity-20" />
         </div>
 
-        {/* 3D wireframe scene (контур, архитектура/стратегия/структура/система) */}
-        <WireframeScene />
+        {/* Particle Cloud (облако точек, премиум-стиль) */}
+        <ParticleCloudScene />
 
         {/* Фоновая типографика */}
         <div className="absolute inset-0 z-0 flex flex-col justify-center items-center pointer-events-none select-none">
@@ -616,7 +510,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Остальные секции (без изменений) */}
+      {/* Остальные секции (полностью идентичны вашему варианту) */}
       <section id="about" className="py-40 md:py-56 px-6 max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div

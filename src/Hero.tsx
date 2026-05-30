@@ -1,82 +1,134 @@
 import { motion } from "framer-motion";
-import { workItems } from "./constants/workItems";
 
 export default function Hero(): JSX.Element {
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  };
+  const fadeInUp = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: "easeOut" },
+    },
+  };
+
   return (
     <div className="relative h-screen w-full overflow-hidden">
-      {/* Слой 1: круговой радиальный градиент (фон) — от центра к краям, тёмный */}
+      {/* Слой 1: основной фон */}
+      <div className="absolute inset-0 bg-[#cbcfd4]" />
+
+      {/* Слой 2: два размытых градиентных пятна — прижаты к нижним углам, размером до центра */}
       <div
-        className="absolute inset-0"
+        className="absolute bottom-0 left-0 h-[50%] w-[50%] rounded-full blur-[60px]"
         style={{
           background:
-            "radial-gradient(circle at center, #1e1b2e, #0a0a14, #000000)",
+            "radial-gradient(circle, rgba(203, 111, 47, 0.35) 0%, rgba(203, 111, 47, 0) 70%)",
+        }}
+      />
+      <div
+        className="absolute bottom-0 right-0 h-[50%] w-[50%] rounded-full blur-[60px]"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(222, 151, 150, 0.35) 0%, rgba(222, 151, 150, 0) 70%)",
         }}
       />
 
-      {/* Слой 2: два размытых пятна — прижаты к левому нижнему и правому нижнему углам */}
-      {/* Левое нижнее пятно (тёплое) */}
-      <div
-        className="absolute bottom-0 left-0 h-[40%] w-[40%] rounded-full blur-[60px]"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(255, 120, 80, 0.25) 0%, rgba(255, 120, 80, 0) 70%)",
-        }}
-      />
-      {/* Правое нижнее пятно (холодное) */}
-      <div
-        className="absolute bottom-0 right-0 h-[40%] w-[40%] rounded-full blur-[60px]"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(80, 180, 255, 0.25) 0%, rgba(80, 180, 255, 0) 70%)",
-        }}
-      />
-
-      {/* Слой 3: фоновый полупрозрачный текст (бренд) */}
-      <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-        <span
-          className="select-none text-center font-sans text-[30vw] font-black leading-none tracking-tighter text-white opacity-[0.05] md:text-[250px]"
-          style={{ letterSpacing: "-0.02em" }}
-        >
-          MindEdge
-        </span>
-      </div>
+      {/* Слой 3: фоновый текст удалён по просьбе */}
 
       {/* Слой 4: контент hero */}
       <div className="relative z-10 flex h-full flex-col">
-        {/* Навигация */}
-        <nav className="flex items-center justify-between px-6 py-6 md:px-12 md:py-8">
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-2xl font-bold tracking-tight text-white drop-shadow-md"
-          >
+        {/* Хедер */}
+        <motion.header
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="absolute top-0 left-0 right-0 z-30 flex items-center justify-between px-6 py-6 md:px-12 md:py-8"
+        >
+          <div className="flex items-center gap-2 text-lg font-semibold tracking-tight text-black drop-shadow-sm">
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="text-[#cb6f2f]"
+            >
+              <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2" />
+              <line x1="12" y1="22" x2="12" y2="15.5" />
+              <polyline points="22 8.5 12 15.5 2 8.5" />
+            </svg>
             MindEdge
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="cursor-pointer text-md font-medium text-white/80 transition hover:text-white"
-          >
-            О нас
-          </motion.div>
-        </nav>
+          </div>
+          <div className="flex items-center gap-6">
+            <button className="flex flex-col gap-1.5 p-2 group">
+              <span className="block h-0.5 w-6 bg-black transition-transform group-hover:translate-x-1"></span>
+              <span className="block h-0.5 w-6 bg-black transition-transform group-hover:-translate-x-1"></span>
+            </button>
+          </div>
+        </motion.header>
 
-        {/* Центральный блок: имя + фото + фамилия */}
+        {/* Список ролей слева */}
+        <motion.div
+          className="absolute bottom-[12%] left-[5%] md:left-[8%] z-20 space-y-3"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          {[
+            "(01) Ментальный наставник",
+            "(02) Коуч уверенности",
+            "(03) Партнёр по росту",
+          ].map((role, i) => (
+            <motion.div
+              key={i}
+              variants={itemVariants}
+              className="text-base md:text-lg font-medium italic text-black drop-shadow-sm"
+            >
+              {role}
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Текст справа */}
+        <motion.div
+          className="absolute top-[28%] right-[6%] md:right-[14%] z-20 max-w-[300px]"
+          variants={fadeInUp}
+          initial="hidden"
+          animate="visible"
+          transition={{ delay: 0.3 }}
+        >
+          <h2 className="text-lg md:text-xl font-semibold italic text-black drop-shadow-sm mb-2">
+            Я Дэвид Миллер!
+          </h2>
+          <p className="text-sm md:text-base text-black/70 leading-relaxed text-right md:text-left">
+            Помогаю высокоэффективным людям преодолеть ментальные барьеры,
+            построить внутреннюю силу и создать жизнь, которую они заслуживают.
+          </p>
+        </motion.div>
+
+        {/* Центральный блок: имя + фото + фамилия (теперь Дэвид Миллер, полупрозрачные) */}
         <div className="flex flex-1 items-center justify-center px-6 md:px-12">
           <div className="flex flex-col items-center gap-8 md:flex-row md:gap-12">
-            {/* Имя (полупрозрачное 0.5) */}
             <motion.h2
               initial={{ opacity: 0, x: -30 }}
               animate={{ opacity: 0.5, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-6xl font-black tracking-tight text-white drop-shadow-lg md:text-7xl lg:text-8xl"
+              className="text-6xl font-black tracking-tight text-black drop-shadow-sm md:text-7xl lg:text-8xl"
             >
-              Александр
+              Дэвид
             </motion.h2>
 
-            {/* Фото */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -85,60 +137,21 @@ export default function Hero(): JSX.Element {
             >
               <img
                 src="https://randomuser.me/api/portraits/men/32.jpg"
-                alt="Mentor"
+                alt="Дэвид Миллер"
                 className="h-full w-full object-cover"
               />
             </motion.div>
 
-            {/* Фамилия (полупрозрачная 0.5) */}
             <motion.h2
               initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 0.5, x: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-6xl font-black tracking-tight text-white drop-shadow-lg md:text-7xl lg:text-8xl"
+              className="text-6xl font-black tracking-tight text-black drop-shadow-sm md:text-7xl lg:text-8xl"
             >
-              Ковальчук
+              Миллер
             </motion.h2>
           </div>
         </div>
-
-        {/* Блок "О менторе" — абсолютно справа вверху (без карточки, просто текст) */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="absolute right-6 top-24 max-w-xs text-right md:right-12 md:top-32"
-        >
-          <h3 className="text-lg font-semibold text-white">О менторе</h3>
-          <p className="mt-2 text-sm text-white/80">
-            Александр — эксперт с 10-летним опытом в трансформации мышления.
-            Помог более 500 клиентам достичь целей.
-          </p>
-        </motion.div>
-
-        {/* Блок "Три пункта" — абсолютно слева внизу, без карточки, номер в строку с заголовком */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="absolute bottom-8 left-6 flex flex-col space-y-6 md:bottom-12 md:left-12"
-        >
-          {workItems.map((item) => (
-            <div key={item.id} className="text-white">
-              <div className="flex flex-wrap items-baseline">
-                <div className="w-8">
-                  <span className="text-sm font-semibold text-orange-300">
-                    (0{item.id})
-                  </span>
-                </div>
-                <h4 className="text-base font-bold">{item.title}</h4>
-              </div>
-              <p className="mt-1 text-sm text-white/70 pl-0 md:pl-8">
-                {item.desc}
-              </p>
-            </div>
-          ))}
-        </motion.div>
       </div>
     </div>
   );

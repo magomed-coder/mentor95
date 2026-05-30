@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import imgUrl from "./assets/photo.avif";
+import {
+  FaBuilding,
+  FaChartLine,
+  FaGlobe,
+  FaLightbulb,
+  FaUniversity,
+  FaHandshake,
+} from "react-icons/fa";
 
 // ---- Типы ----
 type FAQItem = {
@@ -104,19 +112,19 @@ const faqs: FAQItem[] = [
   },
 ];
 
-// Партнёры (React Icons вместо картинок)
+// Партнёры (иконки из react-icons)
 const partners = [
-  { name: "TechCorp", logo: "https://placehold.co/160x80?text=TechCorp" },
-  { name: "FinLeaders", logo: "https://placehold.co/160x80?text=FinLeaders" },
-  { name: "ScaleUp", logo: "https://placehold.co/160x80?text=ScaleUp" },
+  { name: "TechCorp", icon: <FaBuilding size={48} title="TechCorp" /> },
+  { name: "FinLeaders", icon: <FaUniversity size={48} title="FinLeaders" /> },
+  { name: "ScaleUp", icon: <FaChartLine size={48} title="ScaleUp" /> },
   {
     name: "GlobalVentures",
-    logo: "https://placehold.co/160x80?text=GlobalVentures",
+    icon: <FaGlobe size={48} title="GlobalVentures" />,
   },
-  { name: "InnovateX", logo: "https://placehold.co/160x80?text=InnovateX" },
+  { name: "InnovateX", icon: <FaLightbulb size={48} title="InnovateX" /> },
   {
     name: "CapitalGroup",
-    logo: "https://placehold.co/160x80?text=CapitalGroup",
+    icon: <FaHandshake size={48} title="CapitalGroup" />,
   },
 ];
 
@@ -556,10 +564,10 @@ const App: React.FC = () => {
               transition={{ delay: idx * 0.05 }}
               className="flex flex-col items-center justify-center grayscale hover:grayscale-0 transition-all duration-300 opacity-70 hover:opacity-100"
             >
-              <span className="mb-2 text-5xl text-[#FF8C42]">
+              <span className="text-5xl md:text-6xl mb-2 opacity-60 hover:opacity-100">
                 {partner.icon}
               </span>
-              <span className="text-xs mt-1 text-[#111111]/60 font-semibold uppercase tracking-wide">
+              <span className="mt-2 text-xs md:text-sm text-[#111111]/60 font-medium text-center">
                 {partner.name}
               </span>
             </motion.div>

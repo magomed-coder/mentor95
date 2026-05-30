@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-export default function Hero(): JSX.Element {
+export default function Hero() {
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1, transition: { staggerChildren: 0.15 } },
@@ -10,7 +10,7 @@ export default function Hero(): JSX.Element {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
+      transition: { duration: 0.6 },
     },
   };
   const fadeInUp = {
@@ -18,7 +18,7 @@ export default function Hero(): JSX.Element {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: "easeOut" },
+      transition: { duration: 0.8 },
     },
   };
 
@@ -102,7 +102,7 @@ export default function Hero(): JSX.Element {
 
         {/* Текст справа */}
         <motion.div
-          className="absolute top-[28%] right-[6%] md:right-[14%] z-20 max-w-[300px]"
+          className="absolute top-[28%] right-[6%] md:right-[14%] z-20 max-w-75"
           variants={fadeInUp}
           initial="hidden"
           animate="visible"

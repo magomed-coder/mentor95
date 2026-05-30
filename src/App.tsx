@@ -87,6 +87,24 @@ const testimonials = [
     name: "Елена Росси",
     title: "Управляющий директор",
   },
+  {
+    quote:
+      "Сотрудничество с Алексом дало нам новый взгляд на бизнес. Его советы помогли увеличить прибыль на 60% за год.",
+    name: "Игорь Соловьев",
+    title: "COO, FinLeaders",
+  },
+  {
+    quote:
+      "Наставничество Алекса — это синтез опыта, эмпатии и стратегического мышления. Рекомендую всем, кто хочет расти.",
+    name: "Анна Петрова",
+    title: "СЕО, InnovateX",
+  },
+  {
+    quote:
+      "Алекс помог нам выстроить процессы и команду мечты. Теперь мы уверенно масштабируемся.",
+    name: "Владимир Ким",
+    title: "Основатель, ScaleUp",
+  },
 ];
 
 const faqs: FAQItem[] = [
@@ -167,6 +185,64 @@ const AccordionItem: React.FC<{ item: FAQItem; index: number }> = ({
     </motion.div>
   );
 };
+
+// ---- Компонент отзывов ----
+type Testimonial = {
+  quote: string;
+  name: string;
+  title: string;
+};
+
+const Testimonials: React.FC<{ testimonials: Testimonial[] }> = ({
+  testimonials,
+}) => (
+  <section
+    id="testimonials"
+    className="py-40 md:py-56 border-t border-black/5 overflow-hidden"
+  >
+    <div className="px-6 mb-16 max-w-7xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+      >
+        <span className="text-sm uppercase tracking-wider text-[#FF6B8A] font-semibold">
+          Голоса клиентов
+        </span>
+        <h2 className="text-6xl md:text-8xl font-black tracking-tighter mt-4">
+          Отзывы
+        </h2>
+      </motion.div>
+    </div>
+    <div
+      className="overflow-x-auto pb-8 cursor-grab"
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+    >
+      <style>{`.overflow-x-auto::-webkit-scrollbar { display: none; }`}</style>
+      <div className="flex gap-8 px-6 w-max">
+        {testimonials.map((t, idx) => (
+          <motion.div
+            key={t.name + t.title}
+            initial={{ opacity: 0, x: 50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: idx * 0.1 }}
+            className="w-[85vw] md:w-[40vw] lg:w-[30vw] flex-shrink-0 bg-[#F5F5F3] rounded-3xl p-8 border border-black/10 shadow-sm"
+          >
+            <div className="text-6xl text-[#FF8C42]/30 mb-6">“</div>
+            <p className="text-xl md:text-2xl font-light leading-relaxed italic">
+              {t.quote}
+            </p>
+            <div className="mt-8">
+              <p className="font-bold tracking-tight">{t.name}</p>
+              <p className="text-sm text-[#666666]">{t.title}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
 
 // ---- Главный компонент ----
 const App: React.FC = () => {
@@ -576,52 +652,7 @@ const App: React.FC = () => {
       </section>
 
       {/* Отзывы */}
-      <section
-        id="testimonials"
-        className="py-40 md:py-56 border-t border-black/5 overflow-hidden"
-      >
-        <div className="px-6 mb-16 max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-          >
-            <span className="text-sm uppercase tracking-wider text-[#FF6B8A] font-semibold">
-              Голоса клиентов
-            </span>
-            <h2 className="text-6xl md:text-8xl font-black tracking-tighter mt-4">
-              Отзывы
-            </h2>
-          </motion.div>
-        </div>
-        <div
-          className="overflow-x-auto pb-8 cursor-grab"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          <style>{`.overflow-x-auto::-webkit-scrollbar { display: none; }`}</style>
-          <div className="flex gap-8 px-6 w-max">
-            {testimonials.map((t, idx) => (
-              <motion.div
-                key={t.name}
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: idx * 0.1 }}
-                className="w-[85vw] md:w-[40vw] lg:w-[30vw] flex-shrink-0 bg-[#F5F5F3] rounded-3xl p-8 border border-black/10 shadow-sm"
-              >
-                <div className="text-6xl text-[#FF8C42]/30 mb-6">“</div>
-                <p className="text-xl md:text-2xl font-light leading-relaxed italic">
-                  {t.quote}
-                </p>
-                <div className="mt-8">
-                  <p className="font-bold tracking-tight">{t.name}</p>
-                  <p className="text-sm text-[#666666]">{t.title}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <Testimonials testimonials={testimonials} />
 
       {/* FAQ */}
       <section

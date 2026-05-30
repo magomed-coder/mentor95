@@ -226,7 +226,9 @@ const ParticleCloudScene: React.FC = () => (
     camera={{ position: [0, 0, 4.5], fov: 45 }}
   >
     <ambientLight intensity={0.5} />
-    <ParticleCloud />
+    <group position={[-1, 1, 0]}>
+      <ParticleCloud />
+    </group>
   </Canvas>
 );
 

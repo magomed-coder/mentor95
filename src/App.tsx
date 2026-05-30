@@ -171,9 +171,11 @@ function generateCloudPositions(count: number) {
 
 const ParticleCloud: React.FC = () => {
   const pointsRef = useRef<THREE.Points>(null);
-  const mouse = useRef({ x: 0, y: 0 });
   const targetRot = useRef({ x: 0, y: 0 });
-  const positions = useRef(generateCloudPositions(PARTICLE_COUNT));
+  const positions = React.useMemo(
+    () => generateCloudPositions(PARTICLE_COUNT),
+    [],
+  );
   const [currentOpacity, setCurrentOpacity] = useState(0);
 
   useEffect(() => {
@@ -210,12 +212,7 @@ const ParticleCloud: React.FC = () => {
   });
 
   return (
-    <Points
-      ref={pointsRef}
-      positions={positions.current}
-      stride={3}
-      frustumCulled
-    >
+    <Points ref={pointsRef} positions={positions} stride={3} frustumCulled>
       <PointMaterial
         transparent
         color="#111111"
@@ -248,7 +245,7 @@ const WireframeIcosahedron: React.FC = () => {
   );
 };
 
-const ParticleCloudScene: React.FC = () => {
+const ThreeScene: React.FC = () => {
   const { scrollYProgress } = useScroll();
   const cloudY = useTransform(scrollYProgress, [0, 1], [0, -2]);
 
@@ -479,16 +476,7 @@ const App: React.FC = () => {
           <div className="absolute bottom-1/3 right-1/4 w-[35vw] h-[35vw] bg-[#FF6B8A] rounded-full blur-[140px] opacity-20" />
         </div>
 
-        <ParticleCloudScene />
-
-        <div className="absolute inset-0 z-0 flex flex-col justify-center items-center pointer-events-none select-none">
-          <span className="text-[18vw] md:text-[15vw] font-black uppercase tracking-tighter text-[#111111] opacity-[0.08] whitespace-nowrap leading-none">
-            БИЗНЕС
-          </span>
-          <span className="text-[18vw] md:text-[15vw] font-black uppercase tracking-tighter text-[#111111] opacity-[0.08] whitespace-nowrap leading-none -mt-8">
-            НАСТАВНИК
-          </span>
-        </div>
+        <ThreeScene />
 
         <div className="relative z-10 h-full w-full flex items-center justify-center">
           <motion.div

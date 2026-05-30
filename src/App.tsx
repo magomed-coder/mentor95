@@ -16,6 +16,9 @@ import {
   FaLightbulb,
   FaUniversity,
   FaHandshake,
+  FaLinkedin,
+  FaInstagram,
+  FaTwitter,
 } from "react-icons/fa";
 
 // ---- Типы ----
@@ -821,13 +824,33 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <span>© 2025 Алекс Джонсон — Стратегическое наставничество</span>
           <div className="flex gap-6">
-            <span className="cursor-pointer hover:text-[#111111]">
-              LinkedIn
-            </span>
-            <span className="cursor-pointer hover:text-[#111111]">X</span>
-            <span className="cursor-pointer hover:text-[#111111]">
-              Instagram
-            </span>
+            <a
+              href="https://www.linkedin.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-[#111111] text-2xl"
+              aria-label="LinkedIn"
+            >
+              <FaLinkedin />
+            </a>
+            <a
+              href="https://x.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-[#111111] text-2xl"
+              aria-label="X"
+            >
+              <FaTwitter />
+            </a>
+            <a
+              href="https://instagram.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="cursor-pointer hover:text-[#111111] text-2xl"
+              aria-label="Instagram"
+            >
+              <FaInstagram />
+            </a>
           </div>
         </div>
       </footer>

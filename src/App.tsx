@@ -18,8 +18,9 @@ import {
   FaHandshake,
   FaLinkedin,
   FaInstagram,
-  FaTwitter,
 } from "react-icons/fa";
+
+import { FaXTwitter } from "react-icons/fa6";
 
 // ---- Типы ----
 type FAQItem = {
@@ -840,7 +841,7 @@ const App: React.FC = () => {
               className="cursor-pointer hover:text-[#111111] text-2xl"
               aria-label="X"
             >
-              <FaTwitter />
+              <FaXTwitter />
             </a>
             <a
               href="https://instagram.com/"

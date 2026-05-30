@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import imgUrl from "./assets/photo.avif";
 
 // ---- Типы ----
 type FAQItem = {
@@ -146,8 +147,6 @@ const AccordionItem: React.FC<{ item: FAQItem; index: number }> = ({
 // ---- Главный компонент ----
 const App: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const portraitUrl =
-    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format";
 
   // Блокировка скролла при открытом меню
   useEffect(() => {
@@ -300,7 +299,7 @@ const App: React.FC = () => {
           >
             <div className="w-full max-w-md aspect-square overflow-hidden rounded-full bg-gray-200 mx-auto">
               <img
-                src={portraitUrl}
+                src={imgUrl}
                 alt="Алекс Джонсон, бизнес-наставник, чёрно-белый портрет"
                 className="w-full h-full object-cover grayscale contrast-125"
                 style={{ filter: "grayscale(100%) contrast(110%)" }}
@@ -355,7 +354,7 @@ const App: React.FC = () => {
           >
             {/* <div className="w-full max-w-sm aspect-square overflow-hidden rounded-full bg-gray-200"> */}
             <img
-              src={portraitUrl}
+              src={imgUrl}
               alt="Алекс Джонсон"
               className="w-full h-full object-cover grayscale contrast-125"
               style={{ filter: "grayscale(100%) contrast(110%)" }}

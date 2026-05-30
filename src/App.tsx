@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 // ---- Типы ----
@@ -145,26 +145,134 @@ const AccordionItem: React.FC<{ item: FAQItem; index: number }> = ({
 
 // ---- Главный компонент ----
 const App: React.FC = () => {
-  // Единое изображение портрета (круглое, без параллакса)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const portraitUrl =
     "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format";
 
+  // Блокировка скролла при открытом меню
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "auto";
+    }
+    return () => {
+      document.body.style.overflow = "auto";
+    };
+  }, [isMenuOpen]);
+
+  // Плавная прокрутка к секции с учётом высоты навигации
+  const scrollToSection = (sectionId: string) => {
+    setIsMenuOpen(false);
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const navHeight = 80;
+      const elementPosition =
+        element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo({
+        top: elementPosition - navHeight,
+        behavior: "smooth",
+      });
+    }
+  };
+
+  // Пункты меню (якоря)
+  const menuItems = [
+    { label: "Главная", id: "home" },
+    { label: "Обо мне", id: "about" },
+    { label: "Экспертиза", id: "expertise" },
+    { label: "Истории успеха", id: "success" },
+    { label: "Услуги", id: "services" },
+    { label: "Отзывы", id: "testimonials" },
+    { label: "FAQ", id: "faq" },
+    { label: "Контакты", id: "contact" },
+  ];
+
   return (
     <div className="bg-[#F5F5F3] text-[#111111] font-sans antialiased selection:bg-[#FF8C42]/20 overflow-x-hidden">
-      {/* ---- Навигация ---- */}
+      {/* ---- Навигация + бургер-меню ---- */}
       <nav className="fixed top-0 left-0 w-full z-50 py-6 px-6 md:px-12 mix-blend-difference">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <div className="text-white text-xl tracking-tighter font-semibold">
             АД
           </div>
           <div className="flex items-center gap-8">
-            <div className="text-white text-2xl cursor-pointer">☰</div>
+            {/* Бургер-иконка с анимацией */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="relative z-50 text-white focus:outline-none"
+              aria-label="Меню"
+            >
+              <div className="w-6 h-5 flex flex-col justify-between">
+                <span
+                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${
+                    isMenuOpen ? "rotate-45 translate-y-2" : ""
+                  }`}
+                />
+                <span
+                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${
+                    isMenuOpen ? "opacity-0" : ""
+                  }`}
+                />
+                <span
+                  className={`block h-0.5 w-full bg-white transition-all duration-300 ${
+                    isMenuOpen ? "-rotate-45 -translate-y-2" : ""
+                  }`}
+                />
+              </div>
+            </button>
           </div>
         </div>
       </nav>
 
-      {/* ---- Hero секция ---- */}
-      <section className="relative h-screen w-full overflow-hidden">
+      {/* Оверлей меню */}
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-md"
+          >
+            <div className="flex flex-col items-center justify-center h-full px-6">
+              <ul className="space-y-8 text-center">
+                {menuItems.map((item) => (
+                  <motion.li
+                    key={item.id}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    transition={{ delay: 0.05 * menuItems.indexOf(item) }}
+                  >
+                    <button
+                      onClick={() => scrollToSection(item.id)}
+                      className="text-3xl md:text-5xl font-medium tracking-tight text-[#111111] hover:text-[#FF8C42] transition-colors duration-200"
+                    >
+                      {item.label}
+                    </button>
+                  </motion.li>
+                ))}
+                <motion.li
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="pt-8"
+                >
+                  <button
+                    onClick={() => scrollToSection("contact")}
+                    className="mt-4 bg-[#111111] text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-[#FF8C42] transition-all duration-300"
+                  >
+                    Забронировать звонок
+                  </button>
+                </motion.li>
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ---- Hero секция с id="home" ---- */}
+      <section id="home" className="relative h-screen w-full overflow-hidden">
         {/* Фоновые градиентные блики */}
         <div className="absolute inset-0 z-0 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-[40rem] h-[40rem] bg-[#FF8C42] rounded-full blur-[120px] opacity-20 animate-pulse" />
@@ -183,19 +291,18 @@ const App: React.FC = () => {
 
         {/* Контент Hero */}
         <div className="relative z-10 h-full w-full flex items-center justify-center">
-          {/* Центральный круглый портрет (без параллакса) */}
+          {/* Центральный круглый портрет */}
           <motion.div
             initial={{ scale: 1.08, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.4, ease: [0.25, 0.1, 0.2, 1] }}
             className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[65%] md:w-[45%] lg:w-[38%]"
           >
-            <div className="w-full max-w-md aspect-square overflow-hidden rounded-full bg-gray-200">
+            <div className="w-full max-w-md aspect-square overflow-hidden rounded-full bg-gray-200 mx-auto">
               <img
                 src={portraitUrl}
                 alt="Алекс Джонсон, бизнес-наставник, чёрно-белый портрет"
-                className="w-full h-auto object-cover grayscale contrast-125 rounded-full shadow-2xl"
-                // className="w-full h-full object-cover grayscale contrast-125"
+                className="w-full h-full object-cover grayscale contrast-125"
                 style={{ filter: "grayscale(100%) contrast(110%)" }}
               />
             </div>
@@ -236,8 +343,8 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Обо мне (с тем же портретом, круглым) ---- */}
-      <section className="py-40 md:py-56 px-6 max-w-7xl mx-auto">
+      {/* ---- Обо мне (id="about") ---- */}
+      <section id="about" className="py-40 md:py-56 px-6 max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
@@ -246,13 +353,14 @@ const App: React.FC = () => {
             transition={{ duration: 0.7 }}
             className="relative flex justify-center"
           >
+            {/* <div className="w-full max-w-sm aspect-square overflow-hidden rounded-full bg-gray-200"> */}
             <img
               src={portraitUrl}
               alt="Алекс Джонсон"
               className="w-full h-full object-cover grayscale contrast-125"
               style={{ filter: "grayscale(100%) contrast(110%)" }}
             />
-
+            {/* </div> */}
             <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-[#FF8C42] rounded-full blur-3xl opacity-30 -z-10" />
           </motion.div>
           <motion.div
@@ -281,8 +389,11 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Экспертиза ---- */}
-      <section className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5">
+      {/* ---- Экспертиза (id="expertise") ---- */}
+      <section
+        id="expertise"
+        className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
+      >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -322,8 +433,11 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Истории успеха ---- */}
-      <section className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5">
+      {/* ---- Истории успеха (id="success") ---- */}
+      <section
+        id="success"
+        className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
+      >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -379,8 +493,11 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Услуги ---- */}
-      <section className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5">
+      {/* ---- Услуги (id="services") ---- */}
+      <section
+        id="services"
+        className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
+      >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -418,8 +535,11 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Отзывы (горизонтальный скролл) ---- */}
-      <section className="py-40 md:py-56 border-t border-black/5 overflow-hidden">
+      {/* ---- Отзывы (id="testimonials") ---- */}
+      <section
+        id="testimonials"
+        className="py-40 md:py-56 border-t border-black/5 overflow-hidden"
+      >
         <div className="px-6 mb-16 max-w-7xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -459,8 +579,11 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- FAQ ---- */}
-      <section className="py-40 md:py-56 px-6 max-w-4xl mx-auto border-t border-black/5">
+      {/* ---- FAQ (id="faq") ---- */}
+      <section
+        id="faq"
+        className="py-40 md:py-56 px-6 max-w-4xl mx-auto border-t border-black/5"
+      >
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -481,8 +604,11 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* ---- Контакт ---- */}
-      <section className="py-40 md:py-56 px-6 border-t border-black/5">
+      {/* ---- Контакт (id="contact") ---- */}
+      <section
+        id="contact"
+        className="py-40 md:py-56 px-6 border-t border-black/5"
+      >
         <div className="max-w-5xl mx-auto text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}

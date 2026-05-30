@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { OrbitControls, Torus, Environment } from "@react-three/drei";
+import * as THREE from "three";
 import imgUrl from "./assets/photo.avif";
 import {
   FaBuilding,
@@ -16,7 +19,7 @@ type FAQItem = {
   answer: string;
 };
 
-// ---- Данные ----
+// ---- Данные (без изменений) ----
 const expertiseList = [
   {
     id: "01",
@@ -130,7 +133,6 @@ const faqs: FAQItem[] = [
   },
 ];
 
-// Партнёры (иконки из react-icons)
 const partners = [
   { name: "TechCorp", icon: <FaBuilding size={48} title="TechCorp" /> },
   { name: "FinLeaders", icon: <FaUniversity size={48} title="FinLeaders" /> },
@@ -146,7 +148,195 @@ const partners = [
   },
 ];
 
-// ---- Аккордеон ----
+// ---- 3D-компонент: абстрактные сферы (luxury) ----
+const FloatingSpheres: React.FC = () => {
+  const groupRef = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.05;
+      groupRef.current.rotation.x =
+        Math.sin(state.clock.elapsedTime * 0.1) * 0.1;
+    }
+  });
+  return (
+    <group ref={groupRef}>
+      {/* Центральная большая сфера с металлическим блеском */}
+      <mesh position={[0, 0, 0]}>
+        <sphereGeometry args={[1.2, 64, 64]} />
+        <meshStandardMaterial
+          color="#FF8C42"
+          emissive="#FF6B8A"
+          emissiveIntensity={0.3}
+          roughness={0.2}
+          metalness={0.8}
+        />
+      </mesh>
+      {/* Оранжевая сфера поменьше, смещённая */}
+      <mesh position={[2, 1.5, -1]}>
+        <sphereGeometry args={[0.6, 64, 64]} />
+        <meshStandardMaterial
+          color="#FF8C42"
+          emissive="#FF8C42"
+          emissiveIntensity={0.2}
+          roughness={0.3}
+          metalness={0.6}
+        />
+      </mesh>
+      {/* Розовая сфера */}
+      <mesh position={[-1.8, -1.2, 1.5]}>
+        <sphereGeometry args={[0.7, 64, 64]} />
+        <meshStandardMaterial
+          color="#FF6B8A"
+          emissive="#FF6B8A"
+          emissiveIntensity={0.2}
+          roughness={0.4}
+          metalness={0.7}
+        />
+      </mesh>
+      {/* Маленькая сфера сверху */}
+      <mesh position={[0.5, 2.2, 0.8]}>
+        <sphereGeometry args={[0.4, 48, 48]} />
+        <meshStandardMaterial
+          color="#FF8C42"
+          emissiveIntensity={0.15}
+          metalness={0.5}
+          roughness={0.5}
+        />
+      </mesh>
+      {/* Полупрозрачный контур (дополнительный объём) */}
+      <mesh position={[0, 0, 0]} scale={1.5}>
+        <sphereGeometry args={[1.2, 32, 32]} />
+        <meshStandardMaterial
+          color="#FFFFFF"
+          emissive="#FF8C42"
+          emissiveIntensity={0.1}
+          transparent
+          opacity={0.15}
+          side={THREE.BackSide}
+        />
+      </mesh>
+    </group>
+  );
+};
+
+// ---- 3D-сцена с улучшенным освещением ----
+
+// ---- Wireframe 3D Scene ----
+const wireframeLabels = [
+  { label: "Архитектура", pos: [0, 1.7, 0], color: "#FF8C42" },
+  { label: "Стратегия", pos: [-2.2, -1.2, 0], color: "#FF6B8A" },
+  { label: "Структура", pos: [2.2, -1.2, 0], color: "#111111" },
+  { label: "Система", pos: [0, 0, 0], color: "#FF8C42" },
+];
+
+const FloatingWireframe: React.FC = () => {
+  const groupRef = useRef<THREE.Group>(null);
+  useFrame((state) => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y = state.clock.elapsedTime * 0.12;
+      groupRef.current.rotation.x =
+        Math.sin(state.clock.elapsedTime * 0.18) * 0.12;
+    }
+  });
+  return (
+    <group ref={groupRef}>
+      {/* Main Icosahedron */}
+      <mesh position={[0, 0, 0]}>
+        <icosahedronGeometry args={[1.2, 0]} />
+        <meshBasicMaterial
+          wireframe
+          opacity={0.18}
+          transparent
+          color="#FF8C42"
+        />
+      </mesh>
+      {/* Left (strategy) */}
+      <mesh position={[-2.2, -1.2, 0]} scale={0.7}>
+        <icosahedronGeometry args={[1, 0]} />
+        <meshBasicMaterial
+          wireframe
+          opacity={0.15}
+          transparent
+          color="#FF6B8A"
+        />
+      </mesh>
+      {/* Right (structure) */}
+      <mesh position={[2.2, -1.2, 0]} scale={0.7}>
+        <icosahedronGeometry args={[1, 0]} />
+        <meshBasicMaterial
+          wireframe
+          opacity={0.15}
+          transparent
+          color="#111111"
+        />
+      </mesh>
+      {/* Top (architecture) */}
+      <mesh position={[0, 1.7, 0]} scale={0.5}>
+        <icosahedronGeometry args={[1, 0]} />
+        <meshBasicMaterial
+          wireframe
+          opacity={0.13}
+          transparent
+          color="#FF8C42"
+        />
+      </mesh>
+    </group>
+  );
+};
+
+const FloatingWireframeLabels: React.FC = () => {
+  // Labels are rendered as HTML overlays
+  return (
+    <>
+      {wireframeLabels.map((item, idx) => (
+        <div
+          key={item.label}
+          style={{
+            position: "absolute",
+            color: item.color,
+            fontWeight: 700,
+            fontSize: "1.1rem",
+            letterSpacing: "0.04em",
+            left: `calc(50% + ${item.pos[0] * 10}vw)`,
+            top: `calc(50% + ${-item.pos[1] * 10}vw)`,
+            pointerEvents: "none",
+            textShadow: "0 2px 12px #fff, 0 1px 0 #fff",
+            zIndex: 2,
+            userSelect: "none",
+            transition: "opacity 0.7s",
+            opacity: 0.7,
+          }}
+        >
+          {item.label}
+        </div>
+      ))}
+    </>
+  );
+};
+
+const WireframeScene: React.FC = () => (
+  <>
+    <Canvas
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        pointerEvents: "none",
+        zIndex: 0,
+      }}
+      camera={{ position: [0, 0, 6], fov: 45 }}
+    >
+      <ambientLight intensity={0.5} />
+      <directionalLight position={[0, 5, 5]} intensity={0.3} />
+      <FloatingWireframe />
+    </Canvas>
+    <FloatingWireframeLabels />
+  </>
+);
+
+// ---- Аккордеон (без изменений) ----
 const AccordionItem: React.FC<{ item: FAQItem; index: number }> = ({
   item,
   index,
@@ -186,7 +376,7 @@ const AccordionItem: React.FC<{ item: FAQItem; index: number }> = ({
   );
 };
 
-// ---- Компонент отзывов ----
+// ---- Компонент отзывов (без изменений) ----
 type Testimonial = {
   quote: string;
   name: string;
@@ -356,12 +546,18 @@ const App: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* Hero (home) */}
+      {/* Hero (home) с 3D-сценой */}
       <section id="home" className="relative h-screen w-full overflow-hidden">
+        {/* Градиентные блики (оставляем) */}
         <div className="absolute inset-0 z-0 pointer-events-none">
-          <div className="absolute top-1/4 left-1/4 w-[40rem] h-[40rem] bg-[#FF8C42] rounded-full blur-[120px] opacity-20 animate-pulse" />
-          <div className="absolute bottom-1/3 right-1/4 w-[35rem] h-[35rem] bg-[#FF6B8A] rounded-full blur-[140px] opacity-20 animate-pulse" />
+          <div className="absolute top-1/4 left-1/4 w-[40vw] h-[40vw] bg-[#FF8C42] rounded-full blur-[120px] opacity-20" />
+          <div className="absolute bottom-1/3 right-1/4 w-[35vw] h-[35vw] bg-[#FF6B8A] rounded-full blur-[140px] opacity-20" />
         </div>
+
+        {/* 3D wireframe scene (контур, архитектура/стратегия/структура/система) */}
+        <WireframeScene />
+
+        {/* Фоновая типографика */}
         <div className="absolute inset-0 z-0 flex flex-col justify-center items-center pointer-events-none select-none">
           <span className="text-[18vw] md:text-[15vw] font-black uppercase tracking-tighter text-[#111111] opacity-[0.08] whitespace-nowrap leading-none">
             БИЗНЕС
@@ -370,6 +566,8 @@ const App: React.FC = () => {
             НАСТАВНИК
           </span>
         </div>
+
+        {/* Контент Hero */}
         <div className="relative z-10 h-full w-full flex items-center justify-center">
           <motion.div
             initial={{ scale: 1.08, opacity: 0 }}
@@ -418,7 +616,7 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Обо мне (прямоугольный портрет, как было) */}
+      {/* Остальные секции (без изменений) */}
       <section id="about" className="py-40 md:py-56 px-6 max-w-7xl mx-auto">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div
@@ -428,7 +626,6 @@ const App: React.FC = () => {
             transition={{ duration: 0.7 }}
             className="relative flex justify-center"
           >
-            {/* Прямое изображение без круглой обёртки */}
             <img
               src={imgUrl}
               alt="Алекс Джонсон"
@@ -463,7 +660,6 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Экспертиза */}
       <section
         id="expertise"
         className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
@@ -507,7 +703,6 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Истории успеха */}
       <section
         id="success"
         className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
@@ -567,7 +762,6 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Услуги */}
       <section
         id="services"
         className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
@@ -609,7 +803,6 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Новая секция: Клиенты и партнеры */}
       <section
         id="partners"
         className="py-40 md:py-56 px-6 max-w-7xl mx-auto border-t border-black/5"
@@ -651,10 +844,8 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Отзывы */}
       <Testimonials testimonials={testimonials} />
 
-      {/* FAQ */}
       <section
         id="faq"
         className="py-40 md:py-56 px-6 max-w-4xl mx-auto border-t border-black/5"
@@ -679,7 +870,6 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Контакт */}
       <section
         id="contact"
         className="py-40 md:py-56 px-6 border-t border-black/5"
@@ -709,7 +899,6 @@ const App: React.FC = () => {
         </div>
       </section>
 
-      {/* Подвал */}
       <footer className="py-12 border-t border-black/5 text-center text-sm text-[#666666]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
           <span>© 2025 Алекс Джонсон — Стратегическое наставничество</span>
